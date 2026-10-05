@@ -19,7 +19,7 @@ Create Markdown files directly inside `articles/`:
 
 ```text
 articles/
-  introducing ab-test.md
+  introducing ab-lab.md
   My next article.md
 ```
 
