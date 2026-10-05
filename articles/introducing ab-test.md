@@ -26,7 +26,7 @@ The above command also instructs the runner to run the bench with specific condi
 particular all conditions but C08,C16,C17.
 
 For now, I support codex and pi (1.0). I plan to add support for other harnesses. Benches are defined in
-`https://github.com/Fi3/ab-lab/benchmarks` and are composed of a repo URL, a commit, a set of prompts for the agent, and a set of
+[https://github.com/Fi3/ab-lab/tree/master/benchmarks](https://github.com/Fi3/ab-lab/tree/master/benchmarks) and are composed of a repo URL, a commit, a set of prompts for the agent, and a set of
 tests to evaluate the output.
 
 This tool can be used as a benchmark for any repo that you own. You need to define a
@@ -38,7 +38,7 @@ The first bench that I added was slope bench, but it was too easy. Then I tried 
 and it seemed to be a little bit more challenging for the agents, but it was using too many tokens,
 so I ended up running most of the experiments on a reduced version of swe-milestone-scikit-learn
 that I called swe-milestone-scikit-learn-light.
-You can find the results of all these experiments in `results.md`.
+You can find the results of all these experiments in [results.md](https://github.com/Fi3/ab-lab/blob/master/results.md).
 The output, other than with the specific bench evaluator, is also rated with the scb-check.
 
 For now, from the bench data, we can't see any improvement in solving a bench using an "author/reviewer"
