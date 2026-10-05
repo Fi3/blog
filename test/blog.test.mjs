@@ -12,9 +12,35 @@ async function fixture(t) {
   t.after(() => rm(root, { recursive: true, force: true }));
   await mkdir(path.join(root, 'articles'));
   await cp(path.join(projectRoot, 'public'), path.join(root, 'public'), { recursive: true });
-  await cp(path.join(projectRoot, 'site.config.json'), path.join(root, 'site.config.json'));
+  const config = JSON.parse(await readFile(path.join(projectRoot, 'site.config.json'), 'utf8'));
+  delete config.articleRedirects;
+  await writeFile(path.join(root, 'site.config.json'), JSON.stringify(config));
   return root;
 }
+
+test('old article URLs redirect to renamed articles with custom domains and repository paths', async (t) => {
+  const root = await fixture(t);
+  await writeFile(path.join(root, 'articles', 'introducing ab-lab.md'), 'The renamed article.');
+  const configFile = path.join(root, 'site.config.json');
+  const config = JSON.parse(await readFile(configFile, 'utf8'));
+  config.articleRedirects = { 'introducing-ab-test': 'introducing-ab-lab' };
+  await writeFile(configFile, JSON.stringify(config));
+  for (const basePath of ['', '/blog']) {
+    const { output } = await build({ root, basePath });
+    const page = await readFile(path.join(output, 'articles', 'introducing-ab-test', 'index.html'), 'utf8');
+    const target = `${basePath}/articles/introducing-ab-lab/`;
+    assert.ok(page.includes(`<meta http-equiv="refresh" content="0; url=${target}">`));
+    assert.ok(page.includes(`<link rel="canonical" href="${target}">`));
+    assert.ok(page.includes(`<a href="${target}">Read the article</a>`));
+    assert.match(await readFile(path.join(output, 'articles', 'introducing-ab-lab', 'index.html'), 'utf8'), /The renamed article/);
+  }
+  config.articleRedirects = { 'old-article': 'missing-article' };
+  await writeFile(configFile, JSON.stringify(config));
+  await assert.rejects(build({ root }), /Invalid article redirect/);
+  config.articleRedirects = { 'introducing-ab-lab': 'introducing-ab-lab' };
+  await writeFile(configFile, JSON.stringify(config));
+  await assert.rejects(build({ root }), /Article redirect conflicts/);
+});
 
 test('build uses filename titles, escapes HTML, and works at a repository base path', async (t) => {
   const root = await fixture(t);

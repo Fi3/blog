@@ -10,6 +10,13 @@ export async function build({ root = projectRoot, basePath = process.env.BASE_PA
   const base = normalizeBase(basePath);
   const config = JSON.parse(await readFile(path.join(root, 'site.config.json'), 'utf8'));
   const articles = await loadArticles(root, base);
+  const redirects = Object.entries(config.articleRedirects ?? {});
+  for (const [from, to] of redirects) {
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(from) || !articles.some((article) => article.slug === to)) {
+      throw new Error(`Invalid article redirect: ${from} -> ${to}`);
+    }
+    if (articles.some((article) => article.slug === from)) throw new Error(`Article redirect conflicts with article URL: ${from}`);
+  }
   const render = templates(config, base);
   const output = path.join(root, 'dist');
   await rm(output, { recursive: true, force: true });
@@ -22,7 +29,7 @@ export async function build({ root = projectRoot, basePath = process.env.BASE_PA
   await mkdir(assetOutput, { recursive: true });
   for (const entry of await readdir(path.join(root, 'articles'), { withFileTypes: true })) {
     if (!/\.(md|markdown)$/i.test(entry.name) && !entry.name.startsWith('.')) {
-      if (articles.some((article) => article.slug === entry.name)) throw new Error(`Article asset conflicts with article URL: ${entry.name}`);
+      if (articles.some((article) => article.slug === entry.name) || redirects.some(([from]) => from === entry.name)) throw new Error(`Article asset conflicts with article URL: ${entry.name}`);
       await cp(path.join(root, 'articles', entry.name), path.join(assetOutput, entry.name), { recursive: true, filter: (file) => !/\.(md|markdown)$/i.test(file) && !path.basename(file).startsWith('.') });
     }
   }
@@ -30,6 +37,11 @@ export async function build({ root = projectRoot, basePath = process.env.BASE_PA
     const directory = path.join(assetOutput, article.slug);
     await mkdir(directory, { recursive: true });
     await writeFile(path.join(directory, 'index.html'), render.article(article, articles));
+  }
+  for (const [from, to] of redirects) {
+    const directory = path.join(assetOutput, from);
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, 'index.html'), render.redirect(`${base}/articles/${encodeURIComponent(to)}/`));
   }
   console.log(`Built ${articles.length} articles in dist/ (base path: ${base || '/'})`);
   return { output, base };

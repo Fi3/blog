@@ -35,5 +35,17 @@ export function templates(config, base) {
   function article(article) {
     return layout(`${article.title} · ${config.title}`, article.excerpt, articleContent(article));
   }
-  return { home, article, notFound: () => layout(`Page not found · ${config.title}`, 'This page could not be found.', `<section class="not-found page-width"><h1>Page not found.</h1><p><a href="${base}/">Return to the blog</a></p></section>`) };
+  function redirect(url) {
+    return `<!doctype html>
+<html lang="${e(config.language)}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0; url=${e(url)}">
+  <link rel="canonical" href="${e(url)}">
+  <title>Article moved · ${e(config.title)}</title>
+</head>
+<body><p>This article has moved. <a href="${e(url)}">Read the article</a>.</p></body>
+</html>`;
+  }
+  return { home, article, redirect, notFound: () => layout(`Page not found · ${config.title}`, 'This page could not be found.', `<section class="not-found page-width"><h1>Page not found.</h1><p><a href="${base}/">Return to the blog</a></p></section>`) };
 }

@@ -41,6 +41,8 @@ Renaming a file without changing its contents retains its saved dates. If you re
 
 Edit `site.config.json` to set the blog title, description, language, and display timezone. The header uses the configured blog title. Edit `public/styles.css` to change the typography, layout, or colors. Files in `public/` are copied into the published site.
 
+When renaming an article, preserve its old URL with an `articleRedirects` entry in `site.config.json`, mapping its old slug to its new slug (for example, `"introducing-ab-test": "introducing-ab-lab"`). The build creates a redirect page at the old URL with an automatic redirect and a clickable fallback link. Targets must be existing articles.
+
 ## GitHub Pages
 
 1. Push this repository, including the lockfile and `.article-dates.json`, to GitHub.

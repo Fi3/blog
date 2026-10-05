@@ -2,5 +2,8 @@
   "title": "fi3 blog",
   "description": "",
   "language": "en",
-  "timezone": "Europe/Rome"
+  "timezone": "Europe/Rome",
+  "articleRedirects": {
+    "introducing-ab-test": "introducing-ab-lab"
+  }
 }
