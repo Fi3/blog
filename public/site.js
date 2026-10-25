@@ -1,4 +1,7 @@
 (() => {
+  if (['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
+    for (const link of document.querySelectorAll('[data-local-href]')) link.href = link.dataset.localHref;
+  }
   const header = document.querySelector('.site-header');
   if (!header) return;
   let frame = 0;
