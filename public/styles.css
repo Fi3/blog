@@ -17,7 +17,8 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 100px; }
-body { position: relative; margin: 0; font-size: 1rem; -webkit-font-smoothing: antialiased; }
+body { position: relative; display: flex; flex-direction: column; min-height: 100dvh; margin: 0; font-size: 1rem; -webkit-font-smoothing: antialiased; }
+main { flex: 1; }
 a { color: var(--accent); text-underline-offset: .25em; }
 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 5px; border-radius: 2px; }
 ::selection { color: #142e41; background: #c6e2f3; }
@@ -75,7 +76,16 @@ h1 { margin: 0; font-size: clamp(2rem, 3.7vw, 3rem); font-weight: 600; line-heig
 .not-found { padding-block: 70px 100px; min-height: 65vh; }
 .not-found p { margin-top: 30px; }
 
+.site-footer { position: relative; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 40px; padding-block: 30px 40px; border-top: 1px solid var(--line); }
+.footer-note p { margin: 8px 0 0; font-size: .8125rem; line-height: 1.6; color: var(--muted); }
+.footer-note .footer-label { margin: 0; color: var(--ink); font-size: .875rem; font-weight: 600; }
+.old-site-link { display: inline-flex; align-items: center; gap: 18px; padding-block: 8px; color: var(--ink); font-size: 1.25rem; font-weight: 600; letter-spacing: -.025em; text-decoration: none; }
+.old-site-link span { color: var(--accent); transition: transform .2s ease; }
+.old-site-link:hover { color: var(--accent); }
+.old-site-link:hover span { transform: translate(2px, -2px); }
+
 @media (max-width: 760px) {
+  .site-footer { padding-block: 24px 30px; }
   .site-width, .header-inner, .page-width { width: calc(100% - 40px); }
   .page-masthead { min-height: 84px; }
   .wordmark { font-size: 1.25rem; }
@@ -94,7 +104,7 @@ h1 { margin: 0; font-size: clamp(2rem, 3.7vw, 3rem); font-weight: 600; line-heig
   *, *::before, *::after { transition: none !important; }
 }
 @media print {
-  .atmosphere, .site-header, .page-masthead { display: none; }
+  .atmosphere, .site-header, .page-masthead, .site-footer { display: none; }
   .page-width { width: 100%; }
   .article-heading { padding-top: 0; }
   .article-heading h1 { font-size: 28pt; }

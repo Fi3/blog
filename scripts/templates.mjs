@@ -4,6 +4,7 @@ export function templates(config, base) {
   const date = (value) => new Intl.DateTimeFormat(config.language, { day: 'numeric', month: 'long', year: 'numeric', timeZone: config.timezone }).format(new Date(value));
   const time = (value) => `<time datetime="${e(value)}" title="${e(new Intl.DateTimeFormat(config.language, { dateStyle: 'long', timeStyle: 'long', timeZone: config.timezone }).format(new Date(value)))}">${e(date(value))}</time>`;
   const metadata = (article) => `<dl class="article-meta"><div><dt>Created</dt><dd>${time(article.created)}</dd></div><div><dt>Last modified</dt><dd>${time(article.modified)}</dd></div></dl>`;
+  const footer = () => config.oldSiteUrl ? `<footer class="site-footer site-width"><div class="footer-note"><p class="footer-label">Earlier work</p><p>A previous version of my personal site.</p></div><a class="old-site-link" href="${e(config.oldSiteUrl)}">My old website <span aria-hidden="true">↗</span></a></footer>` : '';
   function layout(title, description, body) {
     return `<!doctype html>
 <html lang="${e(config.language)}">
@@ -25,6 +26,7 @@ export function templates(config, base) {
   <header class="site-header" inert aria-hidden="true"><div class="header-inner"><a class="wordmark" href="${base}/">${e(config.title)}</a></div></header>
   <div class="page-masthead site-width"><a class="wordmark" href="${base}/">${e(config.title)}</a></div>
   <main id="main">${body}</main>
+  ${footer()}
 </body>
 </html>`;
   }

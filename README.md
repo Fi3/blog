@@ -39,6 +39,8 @@ Renaming a file without changing its contents retains its saved dates. If you re
 
 ## Customize
 
+The shared footer links to the old website. Set its address with `oldSiteUrl` in `site.config.json`. An empty value hides the footer.
+
 Edit `site.config.json` to set the blog title, description, language, and display timezone. The header uses the configured blog title. Edit `public/styles.css` to change the typography, layout, or colors. Files in `public/` are copied into the published site.
 
 When renaming an article, preserve its old URL with an `articleRedirects` entry in `site.config.json`, mapping its old slug to its new slug (for example, `"introducing-ab-test": "introducing-ab-lab"`). The build creates a redirect page at the old URL with an automatic redirect and a clickable fallback link. Targets must be existing articles.
@@ -65,3 +67,7 @@ BASE_PATH=/blog npm run preview
 ```
 
 Then open **http://127.0.0.1:4321/blog/**. `npm run preview` rebuilds once and serves without live reload. `npm test` verifies content rendering, dates, and deployment paths.
+
+## Old website
+
+The old site is published from `Fi3/vecchio-sito`. Its current Pages address is <https://fi3.github.io/vecchio-sito/>. The shared footer uses <https://old.filippomerli.com/>.

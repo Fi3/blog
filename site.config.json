@@ -1,6 +1,7 @@
 {
   "title": "fi3 blog",
   "description": "",
+  "oldSiteUrl": "https://old.filippomerli.com/",
   "language": "en",
   "timezone": "Europe/Rome",
   "articleRedirects": {
