@@ -1,6 +1,9 @@
 {
-  "title": "fi3 blog",
-  "description": "",
+  "title": "fi3",
+  "description": "Articles and research notes by Filippo Merli.",
+  "githubOwner": "fi3",
+  "articlesOrigin": "https://blog.filippomerli.com",
+  "wikisOrigin": "https://wikis.filippomerli.com",
   "oldSiteUrl": "https://old.filippomerli.com/",
   "language": "en",
   "timezone": "Europe/Rome",

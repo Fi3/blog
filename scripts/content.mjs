@@ -4,7 +4,7 @@ import { readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import MarkdownIt from 'markdown-it';
 
-export const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+export { escapeHtml } from '../public/html.js';
 
 export function normalizeBase(value = '') {
   const base = value.replace(/^\/+|\/+$/g, '');

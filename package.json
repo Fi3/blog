@@ -8,9 +8,13 @@
   },
   "scripts": {
     "dev": "node scripts/serve.mjs --watch",
+    "dev:wikis": "node scripts/serve.mjs --watch --wikis",
     "build": "node scripts/build.mjs",
+    "build:wikis": "node scripts/build.mjs --wikis",
     "preview": "node scripts/serve.mjs",
-    "test": "node --test"
+    "preview:wikis": "node scripts/serve.mjs --wikis",
+    "test": "node --test",
+    "test:github": "node scripts/check-github.mjs"
   },
   "dependencies": {
     "markdown-it": "^14.1.0"

@@ -9,6 +9,10 @@ possible. (tooling, how to execute things, any file that should never be changed
 
 Always reuse the stile and the conventions used by the files that you are changing.
 
+Use Node.js 22 or later. Run `npm test` and `npm run build` after code changes.
+Wiki data loads in the browser. Keep repository names out of production code.
+Run `npm run test:github` to check the current GitHub wiki data.
+
 ## Commit message rules
 Every commit message must clearly say what was done and why it was done. When adding new features it
 must describe which is the underling logic. Never include things that can be seen with a git diff,

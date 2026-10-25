@@ -6,7 +6,8 @@ import { templates } from './templates.mjs';
 
 export const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 
-export async function build({ root = projectRoot, basePath = process.env.BASE_PATH ?? '' } = {}) {
+export async function build({ root = projectRoot, basePath = process.env.BASE_PATH ?? '', section = process.env.SITE_SECTION ?? 'articles' } = {}) {
+  if (!['articles', 'wikis'].includes(section)) throw new Error('SITE_SECTION must be articles or wikis.');
   const base = normalizeBase(basePath);
   const config = JSON.parse(await readFile(path.join(root, 'site.config.json'), 'utf8'));
   const articles = await loadArticles(root, base);
@@ -17,16 +18,25 @@ export async function build({ root = projectRoot, basePath = process.env.BASE_PA
     }
     if (articles.some((article) => article.slug === from)) throw new Error(`Article redirect conflicts with article URL: ${from}`);
   }
-  const render = templates(config, base);
+  const render = templates(config, base, { section });
   const output = path.join(root, 'dist');
   await rm(output, { recursive: true, force: true });
   await mkdir(output, { recursive: true });
   await cp(path.join(root, 'public'), output, { recursive: true });
-  await writeFile(path.join(output, 'index.html'), render.home(articles));
+  await mkdir(path.join(output, 'vendor'), { recursive: true });
+  await cp(path.join(projectRoot, 'node_modules/markdown-it/dist/markdown-it.min.js'), path.join(output, 'vendor/markdown-it.min.js'));
+  await writeFile(path.join(output, 'index.html'), section === 'wikis' ? render.wikis() : render.home(articles));
+  if (section === 'articles') {
+    await mkdir(path.join(output, 'wikis'), { recursive: true });
+    await writeFile(path.join(output, 'wikis/index.html'), render.wikis());
+  }
+  const origin = section === 'wikis' ? config.wikisOrigin : config.articlesOrigin;
+  if (origin) await writeFile(path.join(output, 'CNAME'), `${new URL(origin).hostname}\n`);
   await writeFile(path.join(output, '404.html'), render.notFound());
   await writeFile(path.join(output, '.nojekyll'), '');
   const assetOutput = path.join(output, 'articles');
   await mkdir(assetOutput, { recursive: true });
+  if (section === 'wikis') await writeFile(path.join(assetOutput, 'index.html'), render.home(articles));
   for (const entry of await readdir(path.join(root, 'articles'), { withFileTypes: true })) {
     if (!/\.(md|markdown)$/i.test(entry.name) && !entry.name.startsWith('.')) {
       if (articles.some((article) => article.slug === entry.name) || redirects.some(([from]) => from === entry.name)) throw new Error(`Article asset conflicts with article URL: ${entry.name}`);
@@ -43,10 +53,10 @@ export async function build({ root = projectRoot, basePath = process.env.BASE_PA
     await mkdir(directory, { recursive: true });
     await writeFile(path.join(directory, 'index.html'), render.redirect(`${base}/articles/${encodeURIComponent(to)}/`));
   }
-  console.log(`Built ${articles.length} articles in dist/ (base path: ${base || '/'})`);
+  console.log(`Built ${section} site and ${articles.length} articles in dist/ (base path: ${base || '/'})`);
   return { output, base };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  build().catch((error) => { console.error(error.message); process.exitCode = 1; });
+  build({ section: process.argv.includes('--wikis') ? 'wikis' : undefined }).catch((error) => { console.error(error.message); process.exitCode = 1; });
 }

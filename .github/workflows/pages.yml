@@ -1,9 +1,17 @@
-name: Deploy blog to GitHub Pages
+name: Deploy personal site to GitHub Pages
 
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      section:
+        type: string
+        default: articles
+      source_repository:
+        type: string
+        required: true
 
 permissions:
   contents: read
@@ -20,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          repository: ${{ inputs.source_repository || github.repository }}
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
@@ -33,6 +42,7 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_SECTION: ${{ inputs.section || 'articles' }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist

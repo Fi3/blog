@@ -6,13 +6,14 @@ import path from 'node:path';
 import { build, projectRoot } from './build.mjs';
 
 const watching = process.argv.includes('--watch');
-const { output, base } = await build();
+const section = process.argv.includes('--wikis') ? 'wikis' : process.env.SITE_SECTION;
+const { output, base } = await build({ section });
 const port = Number(process.env.PORT || 4321);
 const host = process.env.HOST || '127.0.0.1';
 const clients = new Set();
 let buildError = '';
 let revision = randomUUID();
-const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.avif': 'image/avif', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2', '.pdf': 'application/pdf' };
+const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.avif': 'image/avif', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/plain; charset=utf-8', '.markdown': 'text/plain; charset=utf-8', '.woff2': 'font/woff2', '.pdf': 'application/pdf' };
 const reload = () => `<script>const revision = ${JSON.stringify(revision)};const events = new EventSource('${base}/__reload');events.onmessage = (event) => { if (event.data !== revision) location.reload(); };</script>`;
 
 const server = createServer(async (request, response) => {
@@ -74,7 +75,7 @@ if (watching) {
   async function rebuild() {
     if (building) { pending = true; return; }
     building = true;
-    try { await build(); buildError = ''; }
+    try { await build({ section }); buildError = ''; }
     catch (error) { buildError = error.message; console.error(`Build failed: ${buildError}`); }
     finally {
       building = false;

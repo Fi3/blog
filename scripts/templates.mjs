@@ -1,11 +1,18 @@
 import { escapeHtml as e } from './content.mjs';
+import { wikiGroups } from '../public/wiki-model.js';
 
-export function templates(config, base) {
+export function templates(config, base, { section = 'articles' } = {}) {
+  const articleRoot = `${base}${section === 'wikis' ? '/articles/' : '/'}`;
+  const wikiRoot = `${base}${section === 'wikis' ? '/' : '/wikis/'}`;
+  const origins = { articles: config.articlesOrigin ?? 'https://blog.filippomerli.com', wikis: config.wikisOrigin ?? 'https://wikis.filippomerli.com' };
+  const localRoots = { articles: articleRoot, wikis: wikiRoot };
+  const navigation = (active) => `<nav class="section-nav" aria-label="Main navigation">${['articles', 'wikis'].map((name) => `<a href="${e(origins[name])}/" data-local-href="${e(localRoots[name])}"${active === name ? ' aria-current="page"' : ''}>${name === 'articles' ? 'Articles' : 'Wikis'}</a>`).join('')}</nav>`;
   const date = (value) => new Intl.DateTimeFormat(config.language, { day: 'numeric', month: 'long', year: 'numeric', timeZone: config.timezone }).format(new Date(value));
   const time = (value) => `<time datetime="${e(value)}" title="${e(new Intl.DateTimeFormat(config.language, { dateStyle: 'long', timeStyle: 'long', timeZone: config.timezone }).format(new Date(value)))}">${e(date(value))}</time>`;
   const metadata = (article) => `<dl class="article-meta"><div><dt>Created</dt><dd>${time(article.created)}</dd></div><div><dt>Last modified</dt><dd>${time(article.modified)}</dd></div></dl>`;
   const footer = () => config.oldSiteUrl ? `<footer class="site-footer site-width"><div class="footer-note"><p class="footer-label">Earlier work</p><p>A previous version of my personal site.</p></div><a class="old-site-link" href="${e(config.oldSiteUrl)}">My old website <span aria-hidden="true">↗</span></a></footer>` : '';
-  function layout(title, description, body) {
+  function layout(title, description, body, active = 'articles', scripts = '') {
+    const wordmark = `<a class="wordmark" href="${e(origins[active])}/" data-local-href="${e(localRoots[active])}">${e(config.title)}</a>`;
     return `<!doctype html>
 <html lang="${e(config.language)}">
 <head>
@@ -19,12 +26,13 @@ export function templates(config, base) {
   <link rel="stylesheet" href="${base}/fonts.css">
   <link rel="stylesheet" href="${base}/styles.css">
   <script src="${base}/site.js" defer></script>
+  ${scripts}
 </head>
 <body>
   <div class="atmosphere" aria-hidden="true"></div>
   <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header" inert aria-hidden="true"><div class="header-inner"><a class="wordmark" href="${base}/">${e(config.title)}</a></div></header>
-  <div class="page-masthead site-width"><a class="wordmark" href="${base}/">${e(config.title)}</a></div>
+  <header class="site-header" inert aria-hidden="true"><div class="header-inner">${wordmark}${navigation(active)}</div></header>
+  <div class="page-masthead site-width">${wordmark}${navigation(active)}</div>
   <main id="main">${body}</main>
   ${footer()}
 </body>
@@ -36,6 +44,12 @@ export function templates(config, base) {
   }
   function article(article) {
     return layout(`${article.title} · ${config.title}`, article.excerpt, articleContent(article));
+  }
+  function wikis() {
+    const settings = JSON.stringify({ owner: config.githubOwner ?? 'fi3', root: wikiRoot, title: config.title }).replace(/</g, '\\u003c');
+    const scripts = `<script id="wiki-config" type="application/json">${settings}</script><script type="module" src="${base}/wikis.js"></script>`;
+    const groups = Object.values(wikiGroups).map((title) => `<section class="wiki-group"><h2>${e(title)}</h2></section>`).join('');
+    return layout(`Wikis · ${config.title}`, 'Research notes and connected pages.', `<div id="wiki-app"><section class="writing site-width"><h1>Wikis</h1><p role="status">Loading wikis…</p>${groups}</section></div><noscript><p class="site-width">Enable JavaScript to load wiki pages from GitHub.</p></noscript>`, 'wikis', scripts);
   }
   function redirect(url) {
     return `<!doctype html>
@@ -49,5 +63,5 @@ export function templates(config, base) {
 <body><p>This article has moved. <a href="${e(url)}">Read the article</a>.</p></body>
 </html>`;
   }
-  return { home, article, redirect, notFound: () => layout(`Page not found · ${config.title}`, 'This page could not be found.', `<section class="not-found page-width"><h1>Page not found.</h1><p><a href="${base}/">Return to the blog</a></p></section>`) };
+  return { home, article, wikis, redirect, notFound: () => layout(`Page not found · ${config.title}`, 'This page could not be found.', `<section class="not-found page-width"><h1>Page not found.</h1><p><a href="${base}/">Return to the site</a></p></section>`, section) };
 }
